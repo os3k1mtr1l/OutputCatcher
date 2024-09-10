@@ -6,8 +6,6 @@
     #include<locale>
     #include<codecvt>
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wmismatched-new-delete"
     void OutputCatcher::m_GetExecutableName() 
     {
         char* path = new char[MAX_PATH];
@@ -15,16 +13,26 @@
         GetModuleFileNameA(NULL, path, MAX_PATH);
         std::string executable_name = PathFindFileNameA(path);
 
-        delete path;
+        delete[] path;
         
         m_log_file_name += executable_name;
     }
-    #pragma GCC diagnostic pop
 
 #elif defined(__linux__) || defined(__gnu_linux__)
+    #include <unistd.h>
+    #include <limits.h>
+    #include <libgen.h>
+
     void OutputCatcher::m_GetExecutableName()
     {
-        
+        char path[PATH_MAX];
+        ssize_t len = ::readlink("/proc/self/exe", path, sizeof(path) - 1);
+        if (len != -1)
+        {
+            path[len] = '\0';
+            std::string executable_name = std::string(basename(path));
+            m_log_file_name += executable_name;
+        }
     }
 #else
     #error "Unsupported platform"
