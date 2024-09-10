@@ -11,14 +11,17 @@
 
     #ifdef MAKEDLL
         #define EXPORT __declspec(dllexport)
-    #else
+    #elif defined(USE_LIBTYPE_SHARED)
         #define EXPORT __declspec(dllimport)
+    #else
+        #define EXPORT
     #endif
 
 #elif defined(__linux__) || defined(__gnu_linux__)
+    #define _LINUX
     #define CONSOLE_STDOUT "/dev/tty"
     #define EXPORT __attribute__((visibility("default")))
-    
+
 #else
     #error "Unsupported platform"
 #endif

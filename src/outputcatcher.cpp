@@ -18,7 +18,7 @@
         m_log_file_name += executable_name;
     }
 
-#elif defined(__linux__) || defined(__gnu_linux__)
+#elif defined(_LINUX)
     #include <unistd.h>
     #include <limits.h>
     #include <libgen.h>
@@ -45,7 +45,7 @@ void OutputCatcher::m_GetTimeNow()
     std::tm* local_time = std::localtime(&now);
 
     std::ostringstream oss;
-    oss<<std::put_time(local_time, "%Y-%m-%d_%H:%M:%S");
+    oss<<std::put_time(local_time, "%Y-%m-%d_%H-%M-%S");
 
     m_log_file_name += oss.str();
 }
