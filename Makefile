@@ -1,6 +1,7 @@
 COMPILER := g++
 DEBUG_FLAGS := -Wall -O0 -g
 RELEASE_FLAGS := -Wall -O3
+DYNAMIC_MACRO := -DMAKEDLL
 
 ifeq ($(OS),Windows_NT)
 	DYNAMIC := .dll
@@ -14,7 +15,10 @@ else
 	RM := rm -f
 	LIBS := 
 	LDFLAGS :=
+	DYNAMIC_MACRO += -fPIC
 endif
+DYNAMIC_MACRO += -shared
+
 SRC := ./src/
 CLEARDEBUG := -s -Wl,--gc-sections
 
@@ -28,14 +32,14 @@ TARGET_RELEASE_STATIC := $(TARGET_NAME)$(STATIC)
 all: build
 
 build:
-	$(COMPILER) $(DEBUG_FLAGS) -DMAKEDLL -shared $(SRC)*.cpp -o $(TARGET_DEBUG_DYNAMIC) $(LIBS)
-	$(COMPILER) $(DEBUG_FLAGS) -DUSE_STATIC_LIB -c $(SRC)*.cpp -o $(TARGET_NAME).o $(LIBS) && ar rcs $(TARGET_DEBUG_STATIC) $(TARGET_NAME).o
+	$(COMPILER) $(DEBUG_FLAGS) $(DYNAMIC_MACRO)  $(SRC)*.cpp -o $(TARGET_DEBUG_DYNAMIC) $(LIBS)
+	$(COMPILER) $(DEBUG_FLAGS) -c $(SRC)*.cpp -o $(TARGET_NAME).o $(LIBS) && ar rcs $(TARGET_DEBUG_STATIC) $(TARGET_NAME).o
 
 clean:
 	$(RM) $(TARGET_NAME)*
 
 distribute:
-	$(COMPILER) $(RELEASE_FLAGS) -DMAKEDLL -shared $(SRC)*.cpp -o $(TARGET_RELEASE_DYNAMIC) $(LIBS) $(LDFLAGS) $(CLEARDEBUG)
-	$(COMPILER) $(DEBUG_FLAGS) -DUSE_STATIC_LIB -c $(SRC)*.cpp -o $(TARGET_NAME).o $(LIBS) $(CLEARDEBUG) && ar rcs $(TARGET_RELEASE_STATIC) $(TARGET_NAME).o
+	$(COMPILER) $(RELEASE_FLAGS) $(DYNAMIC_MACRO) $(SRC)*.cpp -o $(TARGET_RELEASE_DYNAMIC) $(LIBS) $(LDFLAGS) $(CLEARDEBUG)
+	$(COMPILER) $(DEBUG_FLAGS) -c $(SRC)*.cpp -o $(TARGET_NAME).o $(LIBS) $(CLEARDEBUG) && ar rcs $(TARGET_RELEASE_STATIC) $(TARGET_NAME).o
 	
 .PHONY: all build clean distribute
